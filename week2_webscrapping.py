@@ -109,7 +109,7 @@ except:
 nav_values = pd.DataFrame()
     
 # Only working with top 30 records as loading all takes a long time
-for url in url_list[:30]:   
+for url in url_list[:1000]:   # change it from here 
     
     try:    
         # Extracting data from url to dataframe
@@ -137,7 +137,8 @@ for url in url_list[:30]:
 try:
     # Merging the 2 dataframes on basis of common index as url
     nav_name.set_index('url',inplace = True)
-    nav_data = pd.concat([nav_values,nav_name[:30]],axis = 1)
+    
+    nav_data = pd.concat([nav_values,nav_name[:1000]],axis = 1)
     nav_data.set_index('Scheme Name', inplace = True)
     print("Successfully saved fund names and nav values in excel file 'Mutual_Funds.xlsx'.")   
 except:
