@@ -1,7 +1,7 @@
 # importing required libraries
 
 # For automation and web scraping
-from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool
 from itertools import count
 import selenium  
 # for saving the file and using hotkeys
@@ -104,44 +104,43 @@ except:
 # Extracting data from all url and saving in a dataframe
 
 try:
-    url_list = nav_name['url'].values
-    print('URL list created successfully!')
+    url_list1 = nav_name['url'].values
+    url_list = url_list1[:100]
 except:
     print("Failed to create a list of url to run.")
     
 nav_values = pd.DataFrame() # scraped_nav empty value
 
-print(nav_values)
+#print(nav_values)
 
     
 # Only working with top 30 records as loading all takes a long time
-def trail(count):
+def trail(url):
     global nav_values
-    
-    url=url_list[count]
-        
+
     # Extracting data from url to dataframe
     response = urlopen(url)
     data_json = json.loads(response.read())
     date_nav = data_json['data']
     date_nav = pd.DataFrame.from_dict(date_nav)
-        
-    #print("Failed to load data from url's to a dataframe.")
-            
-    # Modifying the dataframe as per our requirement
+
+# Modifying the dataframe as per our requirement
     date_nav.sort_values(by='date', inplace=True)
     date_nav.reset_index(inplace=True)
     date_nav.drop(columns=['index','date'], inplace=True)
     date_nav_add = date_nav.transpose()
     date_nav_add['url'] = url
     date_nav_add.set_index('url',inplace = True)
+    print(date_nav_add)
     nav_values = pd.concat([nav_values,date_nav_add])
-    print(nav_values)
-        
-        #print("Failed to modify nav values dataframe as per requirement.")
+
+# print("Failed to modify nav values dataframe as per requirement.")
 
 if __name__ == "__main__":
-    count = [i for i in range(1,250)]
-    p = Pool()
-    result = p.map(trail, count)
-    print(result)
+    pool = ThreadPool(1) # Make the Pool of workers
+    pool.map(trail, url_list) #Open the urls in their own threads
+    pool.close() #close the pool and wait for the work to finish 
+    pool.join() 
+
+nav_values.to_excel('multi_test1.xlsx')
+
